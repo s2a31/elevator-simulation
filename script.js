@@ -1,5 +1,3 @@
-const container = document.querySelector('.container');
-
 const floors = [
   { num: 0, label: 'Ground', left: 'GL', right: 'GR', hasElevator: true },
   { num: 1, label: '1st Floor', left: '1L', right: '1R' },
@@ -8,14 +6,31 @@ const floors = [
   { num: 4, label: '4th Floor', left: '4L', right: '4R' },
   { num: 5, label: '5th Floor', left: '5L', right: '5R' },
   { num: 6, label: '6th Floor', left: '6L', right: '6R' },
-  { num: 7, label: '7th Floor', left: '7L', right: '7R' }
+  { num: 7, label: '7th Floor', left: '7L', right: '7R' },
+];
+
+const elevators = [
+  {
+    id: 'elevator1',
+    currentFloor: 0,
+    isMoving: false,
+    queue: [],
+    element: null,
+  },
+  {
+    id: 'elevator2',
+    currentFloor: 0,
+    isMoving: false,
+    queue: [],
+    element: null,
+  },
 ];
 
 function createPanel(elevatorId) {
   const panel = document.createElement('div');
   panel.classList.add('panel');
 
-  for (let i=7; i>=0; i--) {
+  for (let i = 7; i >= 0; i--) {
     const btn = document.createElement('button');
     btn.classList.add('panel-btn');
     btn.dataset.floor = i;
@@ -27,7 +42,9 @@ function createPanel(elevatorId) {
   return panel;
 }
 
-floors.forEach(floor => {
+const container = document.querySelector('.container');
+
+floors.forEach((floor) => {
   const floorDiv = document.createElement('div');
   floorDiv.classList.add('floor');
   floorDiv.dataset.floor = floor.num;
@@ -77,3 +94,46 @@ floors.forEach(floor => {
   floorDiv.append(shaftLeft, controls, shaftRight);
   container.appendChild(floorDiv);
 });
+
+elevators.forEach((elevator) => {
+  const el = document.querySelector(`.elevator[data-elevator="${elevator.id}"]`);
+  elevator.element = el;
+});
+
+document.addEventListener('click', (event) => {
+  if (!event.target.matches('.panel-btn')) return;
+
+  const floor = parseInt(event.target.dataset.floor);
+  const elevatorId = event.target.dataset.elevator;
+  const elevator = elevators.find((e) => e.id === elevatorId);
+
+  if (floor === elevator.currentFloor || elevator.queue.includes(floor)) {
+    return;
+  }
+
+  elevator.queue.push(floor);
+
+  if (!elevator.isMoving) {
+    const next = elevator.queue.shift();
+    moveElevator(elevator, next);
+  }
+});
+
+function moveElevator(elevator, targetFloor) {
+  if (elevator.isMoving) return;
+
+  elevator.isMoving = true;
+
+  const targetFloorElement = document.querySelector(`.floor[data-floor="${targetFloor}"]`);
+  const targetShaft = targetFloorElement.querySelector(elevator.id === 'elevator1' ? '.shaft-left' : '.shaft-right');
+
+  targetShaft.appendChild(elevator.element);
+
+  elevator.currentFloor = targetFloor;
+  elevator.isMoving = false;
+
+  if (elevator.queue.length > 0) {
+    const next = elevator.queue.shift();
+    moveElevator(elevator, next);
+  }
+}
