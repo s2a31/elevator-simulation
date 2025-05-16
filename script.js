@@ -101,21 +101,39 @@ elevators.forEach((elevator) => {
 });
 
 document.addEventListener('click', (event) => {
-  if (!event.target.matches('.panel-btn')) return;
+  if (event.target.closest('.panel-btn')) {
+    const btn = event.target.closest('.panel-btn');
+    const floor = parseInt(btn.dataset.floor);
+    const elevatorId = btn.dataset.elevator;
+    const elevator = elevators.find((e) => e.id === elevatorId);
 
-  const floor = parseInt(event.target.dataset.floor);
-  const elevatorId = event.target.dataset.elevator;
-  const elevator = elevators.find((e) => e.id === elevatorId);
+    if (floor === elevator.currentFloor || elevator.queue.includes(floor)) {
+      return;
+    }
 
-  if (floor === elevator.currentFloor || elevator.queue.includes(floor)) {
+    elevator.queue.push(floor);
+    if (!elevator.isMoving) {
+      const next = elevator.queue.shift();
+      moveElevator(elevator, next);
+    }
     return;
   }
 
-  elevator.queue.push(floor);
+  if (event.target.closest('.btn-up') || event.target.closest('.btn-down')) {
+    const btn = event.target.closest('.btn-up, .btn-down');
+    const floorDiv = btn.closest('.floor');
+    const floor = parseInt(floorDiv.dataset.floor);
 
-  if (!elevator.isMoving) {
-    const next = elevator.queue.shift();
-    moveElevator(elevator, next);
+    const availableElevator = elevators.find(e => !e.isMoving) || elevators[0];
+
+    if (floor === availableElevator.currentFloor || availableElevator.queue.includes(floor)) {
+      return;
+    }
+    availableElevator.queue.push(floor);
+    if (!availableElevator.isMoving) {
+      const next = availableElevator.queue.shift();
+      moveElevator(availableElevator, next);
+    }
   }
 });
 
