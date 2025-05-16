@@ -124,7 +124,31 @@ document.addEventListener('click', (event) => {
     const floorDiv = btn.closest('.floor');
     const floor = parseInt(floorDiv.dataset.floor);
 
-    const availableElevator = elevators.find(e => !e.isMoving) || elevators[0];
+    // Find the best elevator to answer the floor call
+    // closest: The best elevator found so far as we look through the array.
+    // elevator: The elevator we’re currently checking to see if it’s better than 'closest'.
+    const availableElevator = elevators.reduce((closest, elevator) => {
+      // distance: How many floors away is the current candidate 'elevator' from the requested floor?
+      const distance = Math.abs(elevator.currentFloor - floor);
+      // closestDistance: How many floors away is the current best so far from the requested floor?
+      const closestDistance = Math.abs(closest.currentFloor - floor);
+
+      // Is the candidate 'distance' elevator closer?
+      const isCloser = distance < closestDistance;
+
+      // elevatorAvailable: Is the candidate elevator available? (Not moving OR no queue.)
+      const elevatorAvailable = !elevator.isMoving || elevator.queue.length === 0;
+      // closestAvailable: Is the best-so-far elevator available?
+      const closestAvailable = !closest.isMoving || closest.queue.length === 0;
+
+      // Choose 'elevator' if it's closer and available
+      if (isCloser && elevatorAvailable) return elevator;
+      // or if the current best 'closest' is not available, 
+      // but candidate 'elevator' is available
+      if (!closestAvailable && elevatorAvailable) return elevator;
+      // Otherwise, stick with the best so far
+      return closest;
+    }, elevators[0]);
 
     if (floor === availableElevator.currentFloor || availableElevator.queue.includes(floor)) {
       return;
