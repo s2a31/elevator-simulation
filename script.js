@@ -1,12 +1,12 @@
 const floors = [
-  { num: 0, label: 'Ground', left: 'GL', right: 'GR', hasElevator: true },
-  { num: 1, label: '1st Floor', left: '1L', right: '1R' },
-  { num: 2, label: '2nd Floor', left: '2L', right: '2R' },
-  { num: 3, label: '3rd Floor', left: '3L', right: '3R' },
-  { num: 4, label: '4th Floor', left: '4L', right: '4R' },
-  { num: 5, label: '5th Floor', left: '5L', right: '5R' },
-  { num: 6, label: '6th Floor', left: '6L', right: '6R' },
-  { num: 7, label: '7th Floor', left: '7L', right: '7R' },
+  { num: 0, label: 'Ground', hasElevator: true },
+  { num: 1, label: '1st Floor' },
+  { num: 2, label: '2nd Floor' },
+  { num: 3, label: '3rd Floor' },
+  { num: 4, label: '4th Floor' },
+  { num: 5, label: '5th Floor' },
+  { num: 6, label: '6th Floor' },
+  { num: 7, label: '7th Floor' },
 ];
 
 const elevators = [
@@ -53,8 +53,13 @@ floors.forEach((floor) => {
   const shaftLeft = document.createElement('div');
   shaftLeft.classList.add('shaft', 'shaft-left');
   const h2Left = document.createElement('h2');
-  h2Left.textContent = floor.left;
+  const indicatorLeft = document.createElement('span');
+  indicatorLeft.classList.add('floor-indicator');
+  indicatorLeft.dataset.elevator = 'elevator1';
+  indicatorLeft.textContent = '';
+  h2Left.appendChild(indicatorLeft);
   shaftLeft.appendChild(h2Left);
+
   if (floor.hasElevator) {
     const elevator1 = document.createElement('div');
     elevator1.classList.add('elevator', 'elevator1');
@@ -81,8 +86,13 @@ floors.forEach((floor) => {
   const shaftRight = document.createElement('div');
   shaftRight.classList.add('shaft', 'shaft-right');
   const h2Right = document.createElement('h2');
-  h2Right.textContent = floor.right;
+  const indicatorRight = document.createElement('span');
+  indicatorRight.classList.add('floor-indicator');
+  indicatorRight.dataset.elevator = 'elevator2';
+  indicatorRight.textContent = '';
+  h2Right.appendChild(indicatorRight);
   shaftRight.appendChild(h2Right);
+
   if (floor.hasElevator) {
     const elevator2 = document.createElement('div');
     elevator2.classList.add('elevator', 'elevator2');
@@ -99,6 +109,15 @@ elevators.forEach((elevator) => {
   const el = document.querySelector(`.elevator[data-elevator="${elevator.id}"]`);
   elevator.element = el;
 });
+
+function updateFloorIndicators() {
+  document.querySelectorAll('.floor-indicator').forEach((span) => {
+    const elevatorId = span.dataset.elevator;
+    const elevator = elevators.find((e) => e.id === elevatorId);
+    span.textContent = elevator.currentFloor === 0 ? 'G' : elevator.currentFloor;
+  });
+}
+updateFloorIndicators();
 
 document.addEventListener('click', (event) => {
   if (event.target.closest('.panel-btn')) {
@@ -143,7 +162,7 @@ document.addEventListener('click', (event) => {
 
       // Choose 'elevator' if it's closer and available
       if (isCloser && elevatorAvailable) return elevator;
-      // or if the current best 'closest' is not available, 
+      // or if the current best 'closest' is not available,
       // but candidate 'elevator' is available
       if (!closestAvailable && elevatorAvailable) return elevator;
       // Otherwise, stick with the best so far
@@ -163,17 +182,14 @@ document.addEventListener('click', (event) => {
 
 function moveElevator(elevator, targetFloor) {
   if (elevator.isMoving) return;
-
   elevator.isMoving = true;
 
-  const targetFloorElement = document.querySelector(`.floor[data-floor="${targetFloor}"]`);
-  const targetShaft = targetFloorElement.querySelector(elevator.id === 'elevator1' ? '.shaft-left' : '.shaft-right');
-
-  targetShaft.appendChild(elevator.element);
+  const floorHeight = document.querySelector('.floor').getBoundingClientRect().height;
+  elevator.element.style.transform = `translateY(${-targetFloor * floorHeight}px)`;
 
   elevator.currentFloor = targetFloor;
+  updateFloorIndicators();
   elevator.isMoving = false;
-
   if (elevator.queue.length > 0) {
     const next = elevator.queue.shift();
     moveElevator(elevator, next);
