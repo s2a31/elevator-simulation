@@ -1,5 +1,5 @@
 export const floors = [
-  { num: 0, label: 'Ground', hasElevator: true },
+  { num: 0, label: 'Ground' },
   { num: 1, label: '1st Floor' },
   { num: 2, label: '2nd Floor' },
   { num: 3, label: '3rd Floor' },
@@ -9,19 +9,4 @@ export const floors = [
   { num: 7, label: '7th Floor' },
 ];
 
-export const elevators = [
-  {
-    id: 'elevator1',
-    currentFloor: 0,
-    isMoving: false,
-    queue: [],
-    element: null,
-  },
-  {
-    id: 'elevator2',
-    currentFloor: 0,
-    isMoving: false,
-    queue: [],
-    element: null,
-  },
-];
+export const elevatorConfigs = [{ id: 'elevator1' }, { id: 'elevator2' }];
