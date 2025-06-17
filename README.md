@@ -21,4 +21,12 @@ The app simulates two elevators inside a 7-floor building. It responds to user a
 
 ## 🚀 How to Run
 
-Open the `index.html` file in a browser or run it with Live Server in VS Code.
+1. **Install Dependencies:**
+   ```
+   npm install
+   ```
+2. **Run the App:**
+   ```
+   npm start
+   ```
+   This will open the app in your browser at `http://localhost:3000`.

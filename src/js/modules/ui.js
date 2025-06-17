@@ -141,14 +141,15 @@ function _updatePanelButtons() {
     getElevatorId: (btn) => btn.dataset.elevator,
     isRequestedFn: (floor, elevatorId) =>
       pendingRequests.some((r) => r.type === 'panel' && r.floor === floor && r.elevator === elevatorId),
-    isDisabledFn: (floor, elevator) => {
+    isDisabledFn: (floor, elevatorId, elevator) => {
       return elevator && elevator.currentFloor === floor;
     },
-    getColorFn: (isRequested, floor, elevator) => {
-      if (elevator) {
-        if (elevator.justArrivedFloor === floor || (elevator.currentFloor === floor && !elevator.isMoving)) {
-          return 'green';
-        }
+    getColorFn: (isRequested, floor, elevatorId, elevator) => {
+      if (
+        elevator &&
+        (elevator.justArrivedFloor === floor || (elevator.currentFloor === floor && !elevator.isMoving))
+      ) {
+        return 'green';
       }
       return isRequested ? 'orange' : 'white';
     },
